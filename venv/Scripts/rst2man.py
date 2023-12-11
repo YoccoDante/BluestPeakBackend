@@ -1,4 +1,4 @@
-#!C:\Users\Lilith\Desktop\projects\delavegaBackend\venv\Scripts\python.exe
+#!C:\Users\Lilith\Desktop\projects\bluestpeakbackend\venv\Scripts\python.exe
 
 # Author:
 # Contact: grubert@users.sf.net
