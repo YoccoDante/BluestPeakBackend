@@ -1,7 +1,7 @@
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
 from project.entities.image import Image
-from env import BUCKET_NAME, BUCKET_REGION
+from env import BUCKET_NAME, REGION
 from project.frameworks_and_drivers.aws_clients import S3Client
 
 class ImageDao():
@@ -19,7 +19,7 @@ class ImageDao():
     def upload_img(image:Image) -> str:
         try:
             S3Client.get_instance().s3.Bucket(BUCKET_NAME).upload_fileobj(image.image, image.image_name)
-            return f"https://{BUCKET_NAME}.s3.{BUCKET_REGION}.amazonaws.com/{image.image_name}"
+            return f"https://{BUCKET_NAME}.s3.{REGION}.amazonaws.com/{image.image_name}"
         except ValueError as e:
             raise e
 

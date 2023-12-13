@@ -6,7 +6,6 @@ from project.frameworks_and_drivers.controllers.comment import bpcomment as comm
 from project.frameworks_and_drivers.controllers.root import bproots as root
 from project.frameworks_and_drivers.controllers.auth import bpauth as auth
 from project.frameworks_and_drivers.controllers.enterprise import bpenterprise as enterprise
-from project.frameworks_and_drivers.controllers.payment import bppayment as payment
 from project.frameworks_and_drivers.database import db
 from project.interface_adapters.dao.userDao import UserDao
 from project.functional.token import TokenController
@@ -28,7 +27,6 @@ def create_app():
     app.register_blueprint(root)
     app.register_blueprint(auth)
     app.register_blueprint(enterprise)
-    app.register_blueprint(payment)
 
     @app.before_request
     def before_request():

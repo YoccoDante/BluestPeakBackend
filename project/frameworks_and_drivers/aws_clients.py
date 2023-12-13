@@ -24,21 +24,21 @@ class S3Client:
             )
             S3Client._instance = self
 
-class SnsClient:
+class SESClient:
     _instance = None
 
     @staticmethod
     def get_instance():
-        if SnsClient._instance is None:
-            SnsClient()
-        return SnsClient._instance
+        if SESClient._instance is None:
+            SESClient()
+        return SESClient._instance
 
     def __init__(self):
-        if SnsClient._instance is not None:
+        if SESClient._instance is not None:
             raise Exception("This class is a singleton!")
         else:
             self.client = boto3.client(
-                "sns",
+                "ses",
                 region_name=REGION
             )
-            SnsClient._instance = self
+            SESClient._instance = self
