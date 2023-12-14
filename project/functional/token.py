@@ -1,4 +1,5 @@
 from time import time
+from typing import Union
 from project.functional.crypto import Crypto
 
 class TokenController():
@@ -41,7 +42,7 @@ class TokenController():
         return True
     
     @staticmethod
-    def get_token_id(token:str) -> str|bool:
+    def get_token_id(token:str) -> Union[str,bool]:
         """Returns the decrypted token _id, if not _id, returns false."""
         token_elements = token.split("&")
         decrypted_elements:list[str] = Crypto.decrypt_list(encrypted_list=token_elements)
@@ -52,7 +53,7 @@ class TokenController():
         return False
     
     @staticmethod
-    def get_token_range(token:str) -> str | bool:
+    def get_token_range(token:str) -> Union[str,bool]:
         """This method is used to get the range of the token, if no range, return False."""
         token_elements = token.split("&")
         decrypted_elements:list[str] = Crypto.decrypt_list(encrypted_list=token_elements)

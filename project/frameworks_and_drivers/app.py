@@ -16,7 +16,7 @@ import datetime
 def create_app():
     app = Flask(__name__)
     CORS(app, resources={r'/*': {
-        'origins': ['http://localhost:3000'],
+        'origins': '+',
         'methods': ['POST','GET','PUT','DELETE','OPTIONS'],
         'allow_headers': ['Authorization','Enterprise-Id','Content-Type']
     }})   
