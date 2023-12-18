@@ -15,11 +15,7 @@ import datetime
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, resources={r'/*': {
-        'origins': '+',
-        'methods': ['POST','GET','PUT','DELETE','OPTIONS'],
-        'allow_headers': ['Authorization','Enterprise-Id','Content-Type']
-    }})   
+    CORS(app)   
     app.register_blueprint(rate)
     app.register_blueprint(users)
     app.register_blueprint(product)

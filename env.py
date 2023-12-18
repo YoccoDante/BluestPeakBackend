@@ -24,7 +24,7 @@ def get_mongo_secret():
 
     # Decrypts secret using the associated KMS key.
     secret = json.loads(get_secret_value_response['SecretString'])
-    print(secret)
+    print("MongoDB connection string retrieved successfully")
     return secret['MONGO_URI']
 
 MONGO_URI = get_mongo_secret()

@@ -9,12 +9,15 @@ from project.interface_adapters.dao.userDao import UserDao
 from project.interface_adapters.dao.rateDao import RateDao
 from project.functional.image import ImageController
 from project.frameworks_and_drivers.decorators import required_auth
+from flask import current_app
+
 
 bpproducts = Blueprint("product", __name__, url_prefix="/product")
 
 @bpproducts.route("/result", methods=["GET"])
 def get_products():
     """Returns a list with all the products from the data base."""
+    current_app.logger.info('trying to get products')
     page = int(request.args.get('page', default=1))
     page_size = int(request.args.get('page_size', default=10))
     enterprise_id = request.headers.get('Enterprise-Id')

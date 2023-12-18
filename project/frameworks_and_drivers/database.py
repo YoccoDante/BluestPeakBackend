@@ -19,7 +19,7 @@ class MongoConnection:
             raise Exception("This class is a singleton!")
         else:
             try:
-                client = MongoClient(MONGO_URI, tlsCAFile=ca)
+                client = MongoClient(MONGO_URI)
                 self.db = client["dbb_usuarios"]
                 MongoConnection._instance = self
             except ConnectionRefusedError:

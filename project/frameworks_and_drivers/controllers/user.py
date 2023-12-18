@@ -8,12 +8,14 @@ from project.functional.image import ImageController
 from project.functional.token import TokenController
 from project.use_cases.user_interactor import DeleteUserInteractor,EditUserInteractor,EditProfilePicInteractor,CreateUserInteractor,GetUsersInteractor
 from project.frameworks_and_drivers.decorators import required_auth
+from flask import current_app
 
 bpuser = Blueprint("user", __name__, url_prefix="/user")
 
 @bpuser.route("/result", methods=["GET"])
 def get_users():
     """Returns a list with the info of all the users"""
+    current_app.logger.info('trying to get users')
     page = int(request.args.get('page', default=1))
     page_size = int(request.args.get('page_size', default=10))
     range = request.args.get('range', default='user')
