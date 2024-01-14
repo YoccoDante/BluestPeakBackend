@@ -1,4 +1,3 @@
-from botocore.exceptions import ClientError
 from project.frameworks_and_drivers.aws_clients import SESClient
 
 class SendEmailInteractor:
@@ -29,10 +28,7 @@ class SendEmailInteractor:
                 },
                 Source=from_address,
             )
-        except ClientError as e:
-            print(e.response['Error']['Message'])
-            raise e
+        except:
+            raise ValueError('An error occured when trying to send an email')
         else:
-            print("Email sent! Message ID:"),
-            print(response['MessageId'])
-            raise response['MessageId']
+            return response['MessageId']

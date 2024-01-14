@@ -1,9 +1,8 @@
 from pymongo import MongoClient
-import certifi
 from env import MONGO_URI
 
 MONGO_URI = MONGO_URI
-ca = certifi.where()
+
 
 class MongoConnection:
     _instance = None

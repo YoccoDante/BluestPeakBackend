@@ -23,14 +23,15 @@ def get_products():
     enterprise_id = request.headers.get('Enterprise-Id')
 
     interactor = GetProductsInteractor(ProductDao, RateDao, Crypto)
-    product_dicts = interactor.execute(
+    product_dicts, total_products = interactor.execute(
         page=page,
         page_size=page_size,
         enterprice_id=enterprise_id
     )
 
     return make_response({
-        "products": product_dicts
+        "products": product_dicts,
+        'total':total_products
     }, 200)
 
 @bpproducts.route("/<string:user_id>", methods=['GET'])

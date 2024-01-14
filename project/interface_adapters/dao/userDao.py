@@ -6,14 +6,17 @@ import bcrypt
 
 class UserDao():
     @staticmethod
-    def get_users(page, page_size, enterprise_id:str, range:str='user') -> list[dict]:
+    def get_users(page, page_size, enterprise_id:str, range:str) -> list[dict]:
         """Returns a list with all users from the database."""
         users = db["users"]
         try:
             # Calculate the number of documents to skip
             skip = (page - 1) * page_size
             # Use the skip and limit methods to implement pagination
-            usersRecieved = users.find({"range" : range, 'enterprise_id':enterprise_id}).skip(skip).limit(page_size)
+            query = {"range": range, 'enterprise_id': enterprise_id} if range != 'all' else {'range':{"$ne": "admin"},'enterprise_id':enterprise_id}
+            usersRecieved = users.find(query).skip(skip).limit(page_size)
+            count = users.count_documents(query)
+            total_users = count // page_size if count >= page_size else 1
             user_list = [User(
                 _id=Crypto.encrypt(str(ObjectId(user["_id"]))),
                 name=user["name"],
@@ -31,9 +34,9 @@ class UserDao():
                 enterprise_id=Crypto.encrypt(user['enterprise_id'])
                 ).__dict__
                 for user in usersRecieved]
-            return user_list
-        except ValueError as e:
-            raise e
+            return user_list, total_users
+        except:
+            raise ValueError('imposible to get users from database')
     
     @staticmethod
     def get_user_by_id(user_id:str, enterprise_id:str) -> User:
@@ -41,6 +44,8 @@ class UserDao():
         users = db["users"]
         try:
             user = users.find_one({"_id" : user_id, 'enterprise_id':enterprise_id})
+            if user is None:
+                return None
             user_to_return = User(
                 _id=Crypto.encrypt(str(ObjectId(user["_id"]))),
                 name=user["name"],
@@ -165,3 +170,14 @@ class UserDao():
             return bcrypt.checkpw(password.encode('utf-8'), user["password"].encode('utf-8'))
         except ValueError as e:
             raise e
+        
+    @staticmethod
+    def change_user_password(user_id, new_password, enterprise_id):
+        """changes a user password"""
+        users = db["users"]
+        try:
+            hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+            new_password = hashed_password.decode('utf-8')  # Store the hashed password as a string
+            users.update_one({'user_id': user_id, 'enterprise_id': enterprise_id}, {'$set': {'password': new_password}})
+        except:
+            raise ValueError('imposible to change user password')

@@ -1,6 +1,9 @@
 from flask import Blueprint, make_response, request
-from project.use_cases.enterprise_interactor import GetEnterpriseUsageByIdInteractor, RegisterNewEnterprise
+from project.use_cases.enterprise_interactor import GetEnterpriseUsageByIdInteractor, RegisterNewEnterprise, CreateAdminInteractor
 from project.interface_adapters.dao.enterpriseDao import EnterpriseDao
+from project.functional.crypto import Crypto
+from project.functional.token import TokenController
+from project.interface_adapters.dao.userDao import UserDao
 
 bpenterprise = Blueprint('enterprise',__name__,url_prefix='/enterprise')
 
@@ -9,7 +12,14 @@ def get_enterprise_usage_by_id():
     enterprise_id = request.headers.get('Enterprise-Id')
     interactor = GetEnterpriseUsageByIdInteractor(EnterpriseDao)
     period = request.args.get('period')
-    total_usage_hours = interactor.execute(enterprise_id, period=period)
+    try:
+        total_usage_hours = interactor.execute(
+            enterprise_id=enterprise_id,
+            period=period
+        )
+    except ValueError as e:
+        raise e
+    
     return make_response({
         "total_usage_hours": total_usage_hours
     }, 200)
@@ -35,3 +45,35 @@ def register_enterprise():
         return make_response({
             'error':str(e)
         }, 400)
+    
+@bpenterprise.route('/admin', methods=['POST'])
+def create_admin():
+    enterprise_id = request.headers.get('Enterprise-Id')
+    request_json = request.get_json()
+    user_data = {
+        "name":request_json["name"],
+        "email":request_json["email"],
+        "password":request_json["password"],
+        "last_name":request_json["last_name"],
+        "gender":request_json['gender'],
+        "phone_number":request_json['phone_number']
+    }
+    interactor = CreateAdminInteractor(
+        crypto=Crypto,
+        token_controller=TokenController,
+        user_dao=UserDao
+    )
+    try:
+        user_dict, token = interactor.execute(
+            enterprise_id=enterprise_id,
+            user_data=user_data
+        )
+        return make_response({
+            'user':user_dict,
+            'token':token
+        },200)
+    
+    except ValueError as e:
+        return make_response({
+            'error':f'{e}'
+        },400)

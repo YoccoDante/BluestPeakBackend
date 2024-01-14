@@ -11,12 +11,15 @@ from project.functional.crypto import Crypto
 from project.functional.image import ImageController
 
 class CreateUserInteractor:
+    """Registers a new user to the database and return a new token and the dict of the new user.\n
+    user data:{"name","email","password", "last_name",'gender','phone_number','range'}"""
     def __init__(self, user_dao:UserDao, token_controller:TokenController, crypto:Crypto):
         self.user_dao = user_dao
         self.token_controller = token_controller
         self.crypto = crypto
 
     def execute(self, user_data, enterprise_id):
+        """return a tuple (user_dict, token) with the dict of the new user and it's new token"""
         # Validate the user data...
         dependencies = {"name","email","password", "last_name",'gender','phone_number','range'}
         for dependency in dependencies:
@@ -27,7 +30,7 @@ class CreateUserInteractor:
             raise ValueError(f'Invalid Gender {user_data["gender"]}')
 
         new_range = user_data["range"]
-        if new_range != "host" and new_range != "user":
+        if new_range not in ["host","user"]:
             raise ValueError("Invalid range")
 
         new_phone_number = user_data["phone_number"]
@@ -80,13 +83,13 @@ class GetUsersInteractor:
 
     def execute(self, range, page, page_size, enterprise_id) -> list[dict]:
         # Validate the range...
-        if range != "user" and range != "host":
+        if range not in ["user","host","all"]:
             raise ValueError("Invalid range")
 
         # Get the user data...
-        user_dicts = self.user_dao.get_users(range=range, page=page, page_size=page_size, enterprise_id=enterprise_id)
+        user_dicts, total_users = self.user_dao.get_users(range=range, page=page, page_size=page_size, enterprise_id=enterprise_id)
 
-        return user_dicts
+        return user_dicts, total_users
 
 class DeleteUserInteractor:
     def __init__(self, product_dao:ProductDao, user_dao:UserDao, rate_dao:RateDao, comment_dao:CommentDao, image_controller:ImageController, token_controller:TokenController):
@@ -97,19 +100,25 @@ class DeleteUserInteractor:
         self.token_controller = token_controller
         self.product_dao = product_dao
 
-    def execute(self, token, enterprise_id):
-        user_id = self.token_controller.get_token_id(token)
+    def execute(self, token, enterprise_id, user_id = None):
+        if user_id is None:
+            user_id = self.token_controller.get_token_id(token)
 
         if user_id == False:
             raise ValueError("Invalid token")
 
-        if not self.user_dao.user_exists_by_id(
+        user = self.user_dao.get_user_by_id(
             user_id=user_id,
             enterprise_id=enterprise_id
-        ):
+        )
+        if user is None:
             raise ValueError(f"Invalid user {user_id}")
 
-        self.image_controller.delete_images(images_key=user_id)
+        if user.profile_pic != '':
+            self.image_controller.delete_images(images_key=user_id)
+
+        if self.product_dao.count_products(owner_id=user_id) != 0:
+            self.image_controller.delete_images(images_key=user_id)
 
         self.user_dao.delete_user(
             user_id=user_id,
@@ -205,5 +214,16 @@ class EditProfilePicInteractor:
         self.user_dao.edit_user(
             user_id=user_id,
             atributes={"profile_pic":new_pic_url},
+            enterprise_id=enterprise_id
+        )
+
+class ChangePasswordinteractor:
+    def __init__(self, user_dao:UserDao) -> None:
+        self.user_dao = user_dao
+    
+    def execute(self, user_id, new_password, enterprise_id):
+        self.user_dao.change_user_password(
+            user_id=user_id,
+            new_password=new_password,
             enterprise_id=enterprise_id
         )

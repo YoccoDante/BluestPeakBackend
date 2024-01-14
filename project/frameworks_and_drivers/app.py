@@ -6,6 +6,8 @@ from project.frameworks_and_drivers.controllers.comment import bpcomment as comm
 from project.frameworks_and_drivers.controllers.root import bproots as root
 from project.frameworks_and_drivers.controllers.auth import bpauth as auth
 from project.frameworks_and_drivers.controllers.enterprise import bpenterprise as enterprise
+from project.frameworks_and_drivers.controllers.validation import bpvalidation as validation
+from project.frameworks_and_drivers.controllers.admin import bpadmin as admin
 from project.frameworks_and_drivers.database import db
 from project.interface_adapters.dao.userDao import UserDao
 from project.functional.token import TokenController
@@ -23,11 +25,13 @@ def create_app():
     app.register_blueprint(root)
     app.register_blueprint(auth)
     app.register_blueprint(enterprise)
+    app.register_blueprint(validation)
+    app.register_blueprint(admin)
 
     @app.before_request
     def before_request():
         g.start_time = datetime.datetime.now()
-        if request.path == '/enterprise/new' and request.method == 'POST':
+        if request.path in ['/enterprise/new', '/validation/','/validation/new'] and request.method == 'POST':
             return
         if request.method == 'OPTIONS':
             return make_response({
@@ -67,6 +71,8 @@ def create_app():
 
     @app.after_request
     def after_request(response):
+        if request.path in ['/enterprise/new', '/validation/','/validation/new'] and request.method == 'POST':
+            return
         end_time = datetime.datetime.now()
         duration = (end_time - g.start_time).total_seconds()
 

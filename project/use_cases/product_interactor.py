@@ -19,13 +19,13 @@ class GetProductsInteractor:
 
     def execute(self, page, page_size, enterprice_id):
         # Get the product data...
-        product_dicts = self.product_dao.get_products(
+        product_dicts, total_products = self.product_dao.get_products(
             page=page,
             page_size=page_size,
             enterprise_id=enterprice_id
         )
 
-        return product_dicts
+        return product_dicts, total_products
     
 class AddProductInteractor:
     def __init__(self, user_dao:UserDao, product_dao:ProductDao, image_controller:ImageController, token_controller:TokenController):

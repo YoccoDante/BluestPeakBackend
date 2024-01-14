@@ -1,5 +1,5 @@
 import boto3
-from env import REGION
+from env import REGION, SESREGION
 
 class S3Client:
     _instance = None
@@ -39,6 +39,6 @@ class SESClient:
         else:
             self.client = boto3.client(
                 "ses",
-                region_name=REGION
+                region_name=SESREGION
             )
             SESClient._instance = self

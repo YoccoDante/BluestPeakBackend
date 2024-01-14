@@ -6,7 +6,7 @@ from project.interface_adapters.dao.rateDao import RateDao
 from project.interface_adapters.dao.productDao import ProductDao
 from project.functional.image import ImageController
 from project.functional.token import TokenController
-from project.use_cases.user_interactor import DeleteUserInteractor,EditUserInteractor,EditProfilePicInteractor,CreateUserInteractor,GetUsersInteractor
+from project.use_cases.user_interactor import DeleteUserInteractor,EditUserInteractor,EditProfilePicInteractor,CreateUserInteractor,GetUsersInteractor,ChangePasswordinteractor
 from project.frameworks_and_drivers.decorators import required_auth
 from flask import current_app
 
@@ -23,12 +23,13 @@ def get_users():
 
     interactor = GetUsersInteractor(UserDao, RateDao, Crypto)
     try:
-        user_dicts = interactor.execute(range=range, page=page, page_size=page_size, enterprise_id=enterprise_id)
+        user_dicts, total_users = interactor.execute(range=range, page=page, page_size=page_size, enterprise_id=enterprise_id)
     except ValueError as e:
         return make_response({"error": str(e)}, 400)
 
     return make_response({
-        "users": user_dicts
+        "users": user_dicts,
+        'total':total_users
     }, 200)
 
 #Método para añadir un usuario POST
@@ -164,4 +165,25 @@ def delete_all_users():
     except ValueError as e:
         return make_response({
             'error':f"{e}"
+        },400)
+    
+@bpuser.route("/", methods=["PUT"])
+@required_auth
+def change_user_password():
+    token = request.headers.get('Authorization')
+    user_id = TokenController.get_token_id(token)
+    interactor = ChangePasswordinteractor(UserDao)
+    request_json = request.get_json()
+    new_password = request_json['new_password']
+    try:
+        interactor.execute(
+            user_id = user_id,
+            new_password=new_password
+        )
+        return make_response({
+            'msg':'password edited'
+        },200)
+    except ValueError as e:
+        return make_response({
+            'error':f'{e}'
         },400)

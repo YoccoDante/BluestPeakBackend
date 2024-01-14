@@ -12,6 +12,8 @@ class ProductDao():
         products = db["products"]
         # Calculate the number of documents to skip
         skip = (page - 1) * page_size
+        count = products.count_documents({'enterprise_id':enterprise_id})
+        total_products = count // page_size if count >= page_size else 1
         # Use the skip and limit methods to implement pagination
         try:
             productsRecieved = products.find({'able':True, 'enterprise_id':enterprise_id}).skip(skip).limit(page_size)
@@ -32,7 +34,7 @@ class ProductDao():
                     stock=product['stock'],
                     enterprise_id=product['enterprise_id']
                 ).__dict__ for product in productsRecieved]
-            return product_list
+            return product_list, total_products
         except ValueError as e:
             raise e
 
@@ -156,3 +158,11 @@ class ProductDao():
             products.delete_many(query)
         except ValueError as e:
             raise e
+        
+    @staticmethod
+    def count_products(owner_id:str):
+        products = db['products']
+        try:
+            return products.count_documents({'owner_id':owner_id})
+        except:
+            raise ValueError('imposible to count owner products')

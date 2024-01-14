@@ -32,3 +32,4 @@ BUCKET_NAME = "bluestpeakbucket"
 REGION = "us-east-2"
 IPN_SECRET_WORD = 'secret_word'
 CLIENT_ARN = 'arn:aws:sns:us-east-2:737439452320:payment'
+SESREGION = 'us-east-1'
