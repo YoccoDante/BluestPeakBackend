@@ -13,7 +13,7 @@ class ProductDao():
         # Calculate the number of documents to skip
         skip = (page - 1) * page_size
         count = products.count_documents({'enterprise_id':enterprise_id})
-        total_products = count // page_size if count >= page_size else 1
+        pages = count // page_size if count >= page_size else 1
         # Use the skip and limit methods to implement pagination
         try:
             productsRecieved = products.find({'able':True, 'enterprise_id':enterprise_id}).skip(skip).limit(page_size)
@@ -34,7 +34,7 @@ class ProductDao():
                     stock=product['stock'],
                     enterprise_id=product['enterprise_id']
                 ).__dict__ for product in productsRecieved]
-            return product_list, total_products
+            return product_list, pages
         except ValueError as e:
             raise e
 
@@ -126,11 +126,14 @@ class ProductDao():
             raise ValueError(f'no such product with _id: {product_id}')
     
     @staticmethod
-    def get_products_by_owner(owner_id:str, enterprise_id:str) -> list[Product]:
+    def get_products_by_owner(owner_id:str, page, page_size,  enterprise_id:str) -> list[Product]:
         """Returns a list of product objects by a given customer_id."""
         products = db["products"]
+        skip = (page - 1) * page_size
+        count = products.count_documents({'enterprise_id':enterprise_id, 'owner_id':owner_id})
+        pages = count // page_size if count >= page_size else 1
         try:
-            productsRecieved = products.find({"owner":owner_id,'enterprise_id':enterprise_id})
+            productsRecieved = products.find({"owner":owner_id,'enterprise_id':enterprise_id}).skip(skip).limit(page_size)
             product_list = [Product(
                 _id=Crypto.encrypt(product["_id"]),
                 title=product["title"],
@@ -146,8 +149,7 @@ class ProductDao():
                 enterprise_id=product['enterprise_id']
             ).__dict__
             for product in productsRecieved]
-
-            return product_list
+            return product_list, pages
         except:
             raise ValueError('no such product or owner')
     

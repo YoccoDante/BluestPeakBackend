@@ -1,3 +1,4 @@
+import ast
 from datetime import datetime
 from flask_pymongo import ObjectId
 from project.entities.user import User
@@ -9,6 +10,7 @@ from project.interface_adapters.dao.productDao import ProductDao
 from project.functional.token import TokenController
 from project.functional.crypto import Crypto
 from project.functional.image import ImageController
+import bcrypt
 
 class CreateUserInteractor:
     """Registers a new user to the database and return a new token and the dict of the new user.\n
@@ -87,9 +89,9 @@ class GetUsersInteractor:
             raise ValueError("Invalid range")
 
         # Get the user data...
-        user_dicts, total_users = self.user_dao.get_users(range=range, page=page, page_size=page_size, enterprise_id=enterprise_id)
+        user_dicts, pages = self.user_dao.get_users(range=range, page=page, page_size=page_size, enterprise_id=enterprise_id)
 
-        return user_dicts, total_users
+        return user_dicts, pages
 
 class DeleteUserInteractor:
     def __init__(self, product_dao:ProductDao, user_dao:UserDao, rate_dao:RateDao, comment_dao:CommentDao, image_controller:ImageController, token_controller:TokenController):
@@ -214,6 +216,22 @@ class EditProfilePicInteractor:
         self.user_dao.edit_user(
             user_id=user_id,
             atributes={"profile_pic":new_pic_url},
+            enterprise_id=enterprise_id
+        )
+
+class ChangeSelfPasswordinteractor:
+    def __init__(self, user_dao:UserDao) -> None:
+        self.user_dao = user_dao
+    
+    def execute(self, user_id, new_password, enterprise_id, current_password):
+        user = self.user_dao.get_user_by_id(user_id=user_id, enterprise_id=enterprise_id)
+        if user is None:
+            raise ValueError('invalid user id')
+        if not bcrypt.checkpw(current_password.encode('utf-8'), user.password.encode('utf-8')):
+            raise ValueError('Incorrect current password')
+        self.user_dao.change_user_password(
+            user_id=user_id,
+            new_password=new_password,
             enterprise_id=enterprise_id
         )
 

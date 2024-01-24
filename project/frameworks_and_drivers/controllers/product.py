@@ -9,21 +9,18 @@ from project.interface_adapters.dao.userDao import UserDao
 from project.interface_adapters.dao.rateDao import RateDao
 from project.functional.image import ImageController
 from project.frameworks_and_drivers.decorators import required_auth
-from flask import current_app
-
 
 bpproducts = Blueprint("product", __name__, url_prefix="/product")
 
 @bpproducts.route("/result", methods=["GET"])
 def get_products():
     """Returns a list with all the products from the data base."""
-    current_app.logger.info('trying to get products')
     page = int(request.args.get('page', default=1))
     page_size = int(request.args.get('page_size', default=10))
     enterprise_id = request.headers.get('Enterprise-Id')
 
     interactor = GetProductsInteractor(ProductDao, RateDao, Crypto)
-    product_dicts, total_products = interactor.execute(
+    product_dicts, pages = interactor.execute(
         page=page,
         page_size=page_size,
         enterprice_id=enterprise_id
@@ -31,24 +28,31 @@ def get_products():
 
     return make_response({
         "products": product_dicts,
-        'total':total_products
+        'pages':pages
     }, 200)
 
-@bpproducts.route("/<string:user_id>", methods=['GET'])
-def get_products_by_owner_id(user_id):
+@bpproducts.route("/by_id/result", methods=['GET'])
+def get_products_by_owner_id():
     interactor = GetProductsByOwnerIdInteractor(UserDao, ProductDao, Crypto)
     enterprise_id = request.headers.get('Enterprise-Id')
+    user_id = request.args.get('user_id')
+    page = int(request.args.get('page', default=1))
+    page_size = int(request.args.get('page_size', default=10))
+
     try:
-        product_dicts = interactor.execute(
+        product_dicts, pages = interactor.execute(
             user_id=user_id,
-            enterprise_id=enterprise_id
+            enterprise_id=enterprise_id,
+            page_size=page_size,
+            page=page
         )
     except ValueError as e:
         return make_response({"error": str(e)}, 400)
 
     return make_response({
-        'products': product_dicts
-    })
+        'products': product_dicts,
+        'pages':pages
+    },)
 
 @bpproducts.route("/new", methods=["POST"])
 @required_auth

@@ -19,13 +19,13 @@ class GetProductsInteractor:
 
     def execute(self, page, page_size, enterprice_id):
         # Get the product data...
-        product_dicts, total_products = self.product_dao.get_products(
+        product_dicts, pages = self.product_dao.get_products(
             page=page,
             page_size=page_size,
             enterprise_id=enterprice_id
         )
 
-        return product_dicts, total_products
+        return product_dicts, pages
     
 class AddProductInteractor:
     def __init__(self, user_dao:UserDao, product_dao:ProductDao, image_controller:ImageController, token_controller:TokenController):
@@ -88,7 +88,7 @@ class GetProductsByOwnerIdInteractor:
         self.product_dao = product_dao
         self.crypto = crypto
 
-    def execute(self, user_id, enterprise_id):
+    def execute(self, user_id, enterprise_id, page, page_size):
         user_id = self.crypto.decrypt(user_id)
         if not self.user_dao.user_exists_by_id(
             user_id=user_id,
@@ -98,7 +98,9 @@ class GetProductsByOwnerIdInteractor:
 
         products = self.product_dao.get_products_by_owner(
             owner_id=user_id,
-            enterprise_id=enterprise_id
+            enterprise_id=enterprise_id,
+            page=page,
+            page_size=page_size
         )
 
         return products

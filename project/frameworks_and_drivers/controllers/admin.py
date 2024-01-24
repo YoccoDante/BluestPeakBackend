@@ -25,14 +25,15 @@ def get_users():
         user_dao=UserDao
     )
     try:
-        user_dicts = interactor.execute(
+        user_dicts, pages = interactor.execute(
             enterprise_id=enterprise_id,
             page=page,
             page_size=page_size,
             range=range
         )
         return make_response({
-            'users':user_dicts
+            'users':user_dicts,
+            'pages':pages
         },200)
     except ValueError as e:
         return make_response({
