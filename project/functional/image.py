@@ -2,13 +2,15 @@ from project.interface_adapters.dao.imageDao import ImageDao
 from project.entities.image import Image
 from flask_pymongo import ObjectId
 from project.interface_adapters.dao.imageDao import ImageDao
+from PIL import Image as PilImage
+import io
 import os
 
 class ImageController():
     """this class is used to controll the work flow with images,
     doesn't have a route in the flask app"""
     @staticmethod
-    def validate_file_size(file, max_size=10485760):  # 10MB
+    def validate_file_size(file, max_size=20971520):  # 10MB
         file.seek(0, os.SEEK_END)
         size = file.tell()
         file.seek(0)
@@ -46,12 +48,20 @@ class ImageController():
             if not ImageController.validate_file_size(img):
                 raise ValueError("File is too large")
 
-            extention = img.filename.rsplit(".",1)[1].lower()
-            new_img_name = f"{str(ObjectId())}.{extention}"
+            # Convert the image to WebP
+            pil_img = PilImage.open(img)
+            webp_img_io = io.BytesIO()
+            pil_img.save(webp_img_io, 'WebP', quality=80)
+
+            # Create a new file-like object to hold the WebP image data
+            webp_img = io.BytesIO(webp_img_io.getvalue())
+            webp_img.name = img.filename.rsplit(".", 1)[0] + '.webp'
+
+            new_img_name = f"{str(ObjectId())}.webp"
             new_image = Image(
                 image_name='/'.join([enterprise_id,owner_id,new_product_id,new_img_name]),
                 owner_id=owner_id,
-                image=img,
+                image=webp_img,
             )
             img_list.append(new_image)
         
@@ -89,11 +99,20 @@ class ImageController():
         so the file must be passed straight from the request and returns a url.\n
         Url sintax:\n
         owner_id/image_id . extention"""
-        extention = image.filename.rsplit(".",1)[1].lower()
-        new_image_name = '/'.join([enterprise_id,owner_id,str(ObjectId())])+"."+extention
+
+        # Convert the image to WebP
+        pil_img = PilImage.open(image)
+        webp_img_io = io.BytesIO()
+        pil_img.save(webp_img_io, 'WebP', quality=80)
+
+        # Create a new file-like object to hold the WebP image data
+        webp_img = io.BytesIO(webp_img_io.getvalue())
+        webp_img.name = image.filename.rsplit(".", 1)[0] + '.webp'
+
+        new_image_name = '/'.join([enterprise_id,owner_id,str(ObjectId())]) + ".webp"
         new_image = Image(
             image_name=new_image_name,
-            image=image,
+            image=webp_img,
             owner_id=owner_id
         )
         try:
