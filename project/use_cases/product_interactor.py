@@ -64,7 +64,7 @@ class AddProductInteractor:
 
         #creating a new product object
         new_product = Product(
-            _id = new_product_id,
+            _id = Crypto.encrypt(new_product_id),
             category = category,
             title = title,
             imgs = list_of_urls,
