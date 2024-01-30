@@ -20,14 +20,14 @@ class ImageController():
     def validate_extenstion(file_name:str) -> bool:
             """This method validades the extention of a single file, in order to validate it,
             the file name must be passed.\n
-            Extentions aveilable: ["png","jpg","jpeg","jfif"]"""
-            ALLOWED_EXTENSIONS = set(["png","jpg","jpeg","jfif"])
+            Extentions aveilable: ["png","jpg","jpeg","jfif","webp"]"""
+            ALLOWED_EXTENSIONS = set(["png","jpg","jpeg","jfif","webp"])
             return "." in file_name and file_name.rsplit(".",1)[1].lower() in ALLOWED_EXTENSIONS
     
     @staticmethod
     def validate_extentions(imgs:list) -> bool:
         """Recieves a list of images straight from the request, and checks if the extention is permitted.\n
-        Extentions availables: ["png","jpg","jpeg","jfif"]"""        
+        Extentions availables: ["png","jpg","jpeg","jfif","webp"]"""        
         for img in imgs:
             if not ImageController.validate_extenstion(img.filename):
                 return False
@@ -48,14 +48,18 @@ class ImageController():
             if not ImageController.validate_file_size(img):
                 raise ValueError("File is too large")
 
-            # Convert the image to WebP
-            pil_img = PilImage.open(img)
-            webp_img_io = io.BytesIO()
-            pil_img.save(webp_img_io, 'WebP', quality=80)
+            # Check if the image is already in WebP format
+            if img.filename.lower().endswith('.webp'):
+                webp_img = img
+            else:
+                # Convert the image to WebP
+                pil_img = PilImage.open(img)
+                webp_img_io = io.BytesIO()
+                pil_img.save(webp_img_io, 'WebP', quality=80)
 
-            # Create a new file-like object to hold the WebP image data
-            webp_img = io.BytesIO(webp_img_io.getvalue())
-            webp_img.name = img.filename.rsplit(".", 1)[0] + '.webp'
+                # Create a new file-like object to hold the WebP image data
+                webp_img = io.BytesIO(webp_img_io.getvalue())
+                webp_img.name = img.filename.rsplit(".", 1)[0] + '.webp'
 
             new_img_name = f"{str(ObjectId())}.webp"
             new_image = Image(
@@ -66,7 +70,7 @@ class ImageController():
             img_list.append(new_image)
         
         try:
-            urls =ImageDao.upload_images(img_list)
+            urls = ImageDao.upload_images(img_list)
         except ValueError as e:
             raise e
 
