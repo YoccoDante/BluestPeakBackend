@@ -113,14 +113,13 @@ def add_product():
             stock=stock,
             enterprise_id=enterprise_id
         )
+        return make_response({
+            "product": new_product_data
+        },200)
     except ValueError as e:
         return make_response({
             'error':f'{e}'
         },400)
-
-    return make_response({
-        "new product": new_product_data
-    },200)
 
 @bpproducts.route("/", methods=['DELETE'])
 @required_auth
