@@ -1,4 +1,3 @@
-from project.functional.crypto import Crypto
 from project.frameworks_and_drivers.database import db
 from project.entities.comment import Comment
 from datetime import date as dt
@@ -48,10 +47,10 @@ class CommentDao():
             root_comments = comments.find({"root_id":root_id, 'enterprise_id':enterprise_id})
             comment_list = [
                 Comment(
-                    _id=Crypto.encrypt(comment["_id"]),
-                    commenter_id=Crypto.encrypt(comment["commenter_id"]),
+                    _id=comment["_id"],
+                    commenter_id=comment["commenter_id"],
                     content=comment["content"],
-                    root_id=Crypto.encrypt(comment["root_id"]),
+                    root_id=comment["root_id"],
                     date=comment["date"],
                     enterprise_id=comment['enterprise_id'],
                     commenter_full_name=UserDao.get_user_by_id(

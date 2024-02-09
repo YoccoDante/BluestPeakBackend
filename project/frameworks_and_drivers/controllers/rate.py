@@ -1,4 +1,3 @@
-from project.functional.crypto import Crypto
 from project.functional.token import TokenController
 from flask import Blueprint, make_response, request
 from project.interface_adapters.dao.rateDao import RateDao
@@ -30,7 +29,7 @@ def rate_target():
     rate = request_json['rate']
     enterprise_id =request.headers.get('Enterprise-Id')
 
-    interactor = RateTargetInteractor(RateDao, TokenController, Crypto)
+    interactor = RateTargetInteractor(RateDao, TokenController)
     try:
         interactor.execute(
             token=token,
@@ -50,7 +49,7 @@ def rate_target():
 @bprate.route("/<string:target_id>", methods=["GET"])
 def get_rate(target_id:str):
     """In order to get the rate of a specific target, it's _id must be passed in the url."""
-    interactor = GetRateInteractor(RateDao, Crypto)
+    interactor = GetRateInteractor(RateDao)
     enterprise_id = request.headers.get('Enterprise-Id')
     user_rate = interactor.execute(target_id, enterprise_id)
 

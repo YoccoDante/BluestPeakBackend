@@ -2,14 +2,12 @@ from project.interface_adapters.dto.userData import UserData
 from project.interface_adapters.dao.userDao import UserDao
 from project.interface_adapters.dao.rateDao import RateDao
 from project.functional.token import TokenController
-from project.functional.crypto import Crypto
 
 class UserLoginInteractor:
-    def __init__(self, user_dao:UserDao, rate_dao:RateDao, token_controller:TokenController, crypto:Crypto):
+    def __init__(self, user_dao:UserDao, rate_dao:RateDao, token_controller:TokenController):
         self.user_dao = user_dao
         self.rate_dao = rate_dao
         self.token_controller = token_controller
-        self.crypto = crypto
 
     def execute(self, email, password, enterprise_id):
         if not self.user_dao.validate_user_by_email_and_password(
@@ -23,7 +21,7 @@ class UserLoginInteractor:
             user_email=email,
             enterpirse_id=enterprise_id
         )
-        user_id = self.crypto.decrypt(user._id)
+        user_id = user._id
         user.stars = self.rate_dao.get_target_rate(
             target_id=user_id,
             enterprise_id=enterprise_id

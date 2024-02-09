@@ -1,4 +1,3 @@
-from project.functional.crypto import Crypto
 from project.interface_adapters.dao.commentDao import CommentDao
 from flask import Blueprint, make_response, request
 from project.interface_adapters.dao.userDao import UserDao
@@ -21,7 +20,7 @@ def get_users():
     range = request.args.get('range', default='user')
     enterprise_id = request.headers.get('Enterprise-Id')
 
-    interactor = GetUsersInteractor(UserDao, RateDao, Crypto)
+    interactor = GetUsersInteractor(UserDao, RateDao)
     try:
         user_dicts, pages = interactor.execute(range=range, page=page, page_size=page_size, enterprise_id=enterprise_id)
     except ValueError as e:
@@ -40,7 +39,7 @@ def add_user ():
     request_json = request.get_json()
     enterprise_id = request.headers.get('Enterprise-Id')
 
-    interactor = CreateUserInteractor(UserDao, TokenController, Crypto)
+    interactor = CreateUserInteractor(UserDao, TokenController)
     try:
         user_dict, token = interactor.execute(
             user_data=request_json,
@@ -152,7 +151,7 @@ def delete_all_users():
     try:
         for user in users:
             token = TokenController.create_token(
-                profile_id=Crypto.decrypt(user['_id']),
+                profile_id=user['_id'],
                 range='host'
             )
             interactor.execute(

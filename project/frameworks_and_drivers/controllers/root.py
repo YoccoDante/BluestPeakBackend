@@ -1,4 +1,3 @@
-from project.functional.crypto import Crypto
 from flask import Blueprint,make_response,request
 from project.interface_adapters.dao.productDao import ProductDao
 from project.interface_adapters.dao.rateDao import RateDao
@@ -10,7 +9,7 @@ bproots = Blueprint("root",__name__, url_prefix="/root")
 
 @bproots.route("/product/<string:product_id>", methods=["GET"])
 def get_product_root(product_id):
-    interactor = GetProductRootInteractor(ProductDao, RateDao, CommentDao, UserDao, Crypto)
+    interactor = GetProductRootInteractor(ProductDao, RateDao, CommentDao, UserDao)
     enterprise_id = request.headers.get('Enterprise-Id')
     try:
         product_data, user_data, comments = interactor.execute(
@@ -33,7 +32,7 @@ def get_product_root(product_id):
 @bproots.route("/user/<string:user_id>", methods=["GET"])
 def get_user_root(user_id:str):
     enterprise_id = request.headers.get('Enterprise-Id')
-    interactor = GetUserRootInteractor(UserDao, ProductDao, RateDao, CommentDao, Crypto)
+    interactor = GetUserRootInteractor(UserDao, ProductDao, RateDao, CommentDao)
     try:
         user_data, comments, user_products = interactor.execute(
             user_id=user_id,

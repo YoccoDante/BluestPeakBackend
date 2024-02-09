@@ -8,17 +8,15 @@ from project.interface_adapters.dao.commentDao import CommentDao
 from project.interface_adapters.dao.rateDao import RateDao
 from project.interface_adapters.dao.productDao import ProductDao
 from project.functional.token import TokenController
-from project.functional.crypto import Crypto
 from project.functional.image import ImageController
 import bcrypt
 
 class CreateUserInteractor:
     """Registers a new user to the database and return a new token and the dict of the new user.\n
     user data:{"name","email","password", "last_name",'gender','phone_number','range'}"""
-    def __init__(self, user_dao:UserDao, token_controller:TokenController, crypto:Crypto):
+    def __init__(self, user_dao:UserDao, token_controller:TokenController):
         self.user_dao = user_dao
         self.token_controller = token_controller
-        self.crypto = crypto
 
     def execute(self, user_data, enterprise_id):
         """return a tuple (user_dict, token) with the dict of the new user and it's new token"""
@@ -72,16 +70,15 @@ class CreateUserInteractor:
 
         # Generate a token...
         token = self.token_controller.create_token(profile_id=new_user._id,range=new_user.range)
-        new_user._id = self.crypto.encrypt(new_id)
+        new_user._id = new_id
 
         # Return the new user and token...
         return UserData(new_user).__dict__, token
     
 class GetUsersInteractor:
-    def __init__(self, user_dao:UserDao, rate_dao:RateDao, crypto:Crypto):
+    def __init__(self, user_dao:UserDao, rate_dao:RateDao):
         self.user_dao = user_dao
         self.rate_dao = rate_dao
-        self.crypto = crypto
 
     def execute(self, range, page, page_size, enterprise_id) -> list[dict]:
         # Validate the range...
@@ -208,7 +205,7 @@ class EditProfilePicInteractor:
                 new_pic_url = self.image_controller.upload_profile_pic(
                 enterprise_id=enterprise_id,
                 image=img,
-                owner_id=Crypto.decrypt(user._id)
+                owner_id=user._id
             )
             except ValueError as e:
                 raise e

@@ -5,18 +5,16 @@ from project.interface_adapters.dao.productDao import ProductDao
 from project.interface_adapters.dao.userDao import UserDao
 from project.interface_adapters.dao.commentDao import CommentDao
 from project.interface_adapters.dao.rateDao import RateDao
-from project.functional.crypto import Crypto
 
 class GetProductRootInteractor:
-    def __init__(self, product_dao:ProductDao, rate_dao:RateDao, comment_dao:CommentDao, user_dao:UserDao, crypto:Crypto):
+    def __init__(self, product_dao:ProductDao, rate_dao:RateDao, comment_dao:CommentDao, user_dao:UserDao):
         self.product_dao = product_dao
         self.rate_dao = rate_dao
         self.comment_dao = comment_dao
         self.user_dao = user_dao
-        self.crypto = crypto
 
     def execute(self, product_id, enterprise_id):
-        product_id = self.crypto.decrypt(product_id)
+        product_id = product_id
         if not self.product_dao.product_exists_by_id(product_id=product_id, enterprise_id=enterprise_id):
             raise ValueError('invalid product')
 
@@ -30,7 +28,7 @@ class GetProductRootInteractor:
         )
         product_data = ProductData(product).__dict__
 
-        owner_id = self.crypto.decrypt(product.owner)
+        owner_id = product.owner
         user = self.user_dao.get_user_by_id(
             user_id=owner_id,
             enterprise_id=enterprise_id
@@ -49,15 +47,14 @@ class GetProductRootInteractor:
         return product_data, user_data, comments
     
 class GetUserRootInteractor:
-    def __init__(self, user_dao:UserDao, product_dao:ProductDao, rate_dao:RateDao, comment_dao:CommentDao, crypto:Crypto):
+    def __init__(self, user_dao:UserDao, product_dao:ProductDao, rate_dao:RateDao, comment_dao:CommentDao):
         self.user_dao = user_dao
         self.product_dao = product_dao
         self.rate_dao = rate_dao
         self.comment_dao = comment_dao
-        self.crypto = crypto
 
     def execute(self, user_id, enterprise_id):
-        user_id = self.crypto.decrypt(user_id)
+        user_id = user_id
         if not self.user_dao.user_exists_by_id(
             user_id=user_id,
             enterprise_id=enterprise_id

@@ -1,7 +1,5 @@
 from project.frameworks_and_drivers.database import db
-from project.functional.crypto import Crypto
 from project.entities.product import Product
-from flask_pymongo import ObjectId
 from project.interface_adapters.dao.rateDao import RateDao
 from project.functional.image import ImageController
 
@@ -20,7 +18,7 @@ class ProductDao():
 
             product_list = [
                 Product(
-                    _id = Crypto.encrypt(str(ObjectId(product["_id"]))),
+                    _id = product["_id"],
                     category=product["category"],
                     title=product["title"],
                     imgs=product["imgs"],
@@ -29,7 +27,7 @@ class ProductDao():
                     province=product["province"],
                     price=product["price"],
                     able = product["able"],
-                    owner = Crypto.encrypt(product["owner"]),
+                    owner = product["owner"],
                     stars = RateDao.get_target_rate(product['_id'], enterprise_id=product['enterprise_id']),
                     stock=product['stock'],
                     enterprise_id=product['enterprise_id']
@@ -45,7 +43,7 @@ class ProductDao():
         try:
             product = products.find_one({"_id" : product_id, 'enterprise_id':enterprise_id})   
             product_to_return = Product(
-                _id = Crypto.encrypt(product["_id"]),
+                _id = product["_id"],
                 category=product["category"],
                 title=product["title"],
                 imgs=product["imgs"],
@@ -54,7 +52,7 @@ class ProductDao():
                 province=product["province"],
                 price=product["price"],
                 able = product["able"],
-                owner = Crypto.encrypt(product["owner"]),
+                owner = product["owner"],
                 stock=product['stock'],
                     enterprise_id=product['enterprise_id']
             )
@@ -135,7 +133,7 @@ class ProductDao():
         try:
             productsRecieved = products.find({"owner":owner_id,'enterprise_id':enterprise_id}).skip(skip).limit(page_size)
             product_list = [Product(
-                _id=Crypto.encrypt(product["_id"]),
+                _id=product["_id"],
                 title=product["title"],
                 category=product["category"],
                 imgs=product["imgs"],
@@ -144,7 +142,7 @@ class ProductDao():
                 province=product["province"],
                 price=product["price"],
                 able=product["able"],
-                owner=Crypto.encrypt(product["owner"]),
+                owner=product["owner"],
                 stock=product['stock'],
                 enterprise_id=product['enterprise_id']
             ).__dict__

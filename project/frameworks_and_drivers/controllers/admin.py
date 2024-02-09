@@ -6,7 +6,6 @@ from project.interface_adapters.dao.productDao import ProductDao
 from project.interface_adapters.dao.commentDao import CommentDao
 from project.functional.image import ImageController
 from project.functional.token import TokenController
-from project.functional.crypto import Crypto
 from project.frameworks_and_drivers.decorators import required_admin_auth
 
 bpadmin = Blueprint('admin',__name__, url_prefix='/admin')
@@ -20,7 +19,6 @@ def get_users():
     enterprise_id = request.headers.get('Enterprise-Id')
 
     interactor = GetUsersInteractor(
-        crypto=Crypto,
         rate_dao=RateDao,
         user_dao=UserDao
     )
@@ -57,7 +55,7 @@ def delete_user(user_id):
         interactor.execute(
             token=token,
             enterprise_id=enterprise_id,
-            user_id=Crypto.decrypt(user_id)
+            user_id=user_id
         )
         return make_response({
             'msg':'user deleted sucessfully'
@@ -70,7 +68,7 @@ def delete_user(user_id):
 @bpadmin.route("/user/<string:user_id>", methods=["PUT"])
 @required_admin_auth
 def change_user_password(user_id):
-    user_id = Crypto.decrypt(user_id)
+    user_id = user_id
     interactor = ChangePasswordinteractor(UserDao)
     request_json = request.get_json()
     new_password = request_json['new_password']

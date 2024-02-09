@@ -1,7 +1,6 @@
 from flask import Blueprint, make_response, request
 from project.use_cases.enterprise_interactor import GetEnterpriseUsageByIdInteractor, RegisterNewEnterprise, CreateAdminInteractor
 from project.interface_adapters.dao.enterpriseDao import EnterpriseDao
-from project.functional.crypto import Crypto
 from project.functional.token import TokenController
 from project.interface_adapters.dao.userDao import UserDao
 
@@ -59,7 +58,6 @@ def create_admin():
         "phone_number":request_json['phone_number']
     }
     interactor = CreateAdminInteractor(
-        crypto=Crypto,
         token_controller=TokenController,
         user_dao=UserDao
     )

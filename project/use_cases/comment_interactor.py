@@ -4,15 +4,13 @@ from project.interface_adapters.dao.productDao import ProductDao
 from project.functional.token import TokenController
 from project.entities.comment import Comment
 from flask_pymongo import ObjectId
-from project.functional.crypto import Crypto
 
 class MakeCommentInteractor:
-    def __init__(self, user_dao:UserDao, product_dao:ProductDao, comment_dao:CommentDao, token_controller:TokenController, crypto:Crypto):
+    def __init__(self, user_dao:UserDao, product_dao:ProductDao, comment_dao:CommentDao, token_controller:TokenController):
         self.user_dao = user_dao
         self.product_dao = product_dao
         self.comment_dao = comment_dao
         self.token_controller = token_controller
-        self.crypto = crypto
 
     def execute(self, commenter_id, content, root_id, enterprise_id):
         if not self.user_dao.user_exists_by_id(
@@ -46,12 +44,11 @@ class MakeCommentInteractor:
         return new_comment
 
 class GetRootCommentsInteractor:
-    def __init__(self, comment_dao:CommentDao, crypto:Crypto):
+    def __init__(self, comment_dao:CommentDao):
         self.comment_dao = comment_dao
-        self.crypto = crypto
 
     def execute(self, root_id, enterprise_id):
-        root_id = self.crypto.decrypt(root_id)
+        root_id = root_id
         comments = self.comment_dao.get_root_comments(
             root_id=root_id,
             enterprise_id=enterprise_id

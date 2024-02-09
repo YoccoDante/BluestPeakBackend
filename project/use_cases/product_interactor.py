@@ -1,21 +1,18 @@
 from project.interface_adapters.dao.commentDao import CommentDao
-from project.functional.crypto import Crypto
 from project.functional.token import TokenController
 from project.functional.image import ImageController
 from project.interface_adapters.dto.productData import ProductData
 from project.interface_adapters.dao.productDao import ProductDao
 from project.interface_adapters.dao.rateDao import RateDao
-from project.functional.crypto import Crypto
 from flask_pymongo import ObjectId
 from project.entities.product import Product
 from project.interface_adapters.dao.userDao import UserDao
 from project.interface_adapters.dao.productDao import ProductDao
 
 class GetProductsInteractor:
-    def __init__(self, product_dao:ProductDao, rate_dao:RateDao, crypto:Crypto):
+    def __init__(self, product_dao:ProductDao, rate_dao:RateDao):
         self.product_dao = product_dao
         self.rate_dao = rate_dao
-        self.crypto = crypto
 
     def execute(self, page, page_size, enterprice_id):
         # Get the product data...
@@ -64,7 +61,7 @@ class AddProductInteractor:
 
         #creating a new product object
         new_product = Product(
-            _id = Crypto.encrypt(new_product_id),
+            _id = new_product_id,
             category = category,
             title = title,
             imgs = list_of_urls,
@@ -83,13 +80,11 @@ class AddProductInteractor:
         return ProductData(new_product).__dict__
     
 class GetProductsByOwnerIdInteractor:
-    def __init__(self, user_dao:UserDao, product_dao:ProductDao, crypto:Crypto):
+    def __init__(self, user_dao:UserDao, product_dao:ProductDao):
         self.user_dao = user_dao
         self.product_dao = product_dao
-        self.crypto = crypto
 
     def execute(self, user_id, enterprise_id, page, page_size):
-        user_id = self.crypto.decrypt(user_id)
         if not self.user_dao.user_exists_by_id(
             user_id=user_id,
             enterprise_id=enterprise_id

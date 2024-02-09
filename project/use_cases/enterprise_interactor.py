@@ -1,7 +1,6 @@
 from project.interface_adapters.dao.enterpriseDao import EnterpriseDao
 from project.entities.enterprise import Enterprise
 from project.interface_adapters.dao.userDao import UserDao
-from project.functional.crypto import Crypto
 from project.functional.token import TokenController
 from flask_pymongo import ObjectId
 from datetime import datetime
@@ -47,10 +46,9 @@ class RegisterNewEnterprise:
 class CreateAdminInteractor:
     """Registers a new user to the database and return a new token and the dict of the new user.\n
     user data:{"name","email","password", "last_name",'gender','phone_number'}"""
-    def __init__(self, user_dao:UserDao, token_controller:TokenController, crypto:Crypto):
+    def __init__(self, user_dao:UserDao, token_controller:TokenController):
         self.user_dao = user_dao
         self.token_controller = token_controller
-        self.crypto = crypto
 
     def execute(self, user_data, enterprise_id):
         """return a tuple (user_dict, token) with the dict of the new user and it's new token"""
@@ -102,7 +100,7 @@ class CreateAdminInteractor:
 
         # Generate a token...
         token = self.token_controller.create_token(profile_id=new_user._id,range=new_user.range)
-        new_user._id = self.crypto.encrypt(new_id)
+        new_user._id = new_id
 
         # Return the new user and token...
         return UserData(new_user).__dict__, token

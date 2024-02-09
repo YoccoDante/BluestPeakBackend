@@ -1,5 +1,4 @@
 from project.functional.token import TokenController
-from project.functional.crypto import Crypto
 from project.interface_adapters.dao.commentDao import CommentDao
 from flask import Blueprint, request, make_response
 from project.interface_adapters.dao.userDao import UserDao
@@ -30,9 +29,9 @@ def make_comment ():
     enterprise_id = request.headers.get('Enterprise-Id')
     commenter_id = TokenController.get_token_id(token)
     content = request_json['content']
-    root_id = Crypto.decrypt(request_json['root_id'])
+    root_id = request_json['root_id']
 
-    interactor = MakeCommentInteractor(UserDao, ProductDao, CommentDao, TokenController, Crypto)
+    interactor = MakeCommentInteractor(UserDao, ProductDao, CommentDao, TokenController)
     try:
         new_comment = interactor.execute(
             commenter_id=commenter_id,
@@ -53,7 +52,7 @@ def make_comment ():
 @bpcomment.route("/<string:root_id>", methods=["GET"])
 def get_root_comments(root_id:str):
     """Returns all the commentaries made to a specific target, the target _id must be passed in the url."""
-    interactor = GetRootCommentsInteractor(CommentDao, Crypto)
+    interactor = GetRootCommentsInteractor(CommentDao)
     comment_dicts = interactor.execute(root_id)
 
     return make_response({

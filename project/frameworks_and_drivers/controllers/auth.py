@@ -1,5 +1,4 @@
 from project.interface_adapters.dao.rateDao import RateDao
-from project.functional.crypto import Crypto
 from project.functional.token import TokenController
 from flask import Blueprint, request, make_response
 from project.interface_adapters.dao.userDao import UserDao
@@ -25,7 +24,7 @@ def user_login():
     email = request_json["email"]
     password = request_json["password"]
 
-    interactor = UserLoginInteractor(UserDao, RateDao, TokenController, Crypto)
+    interactor = UserLoginInteractor(UserDao, RateDao, TokenController)
     try:
         user_dict, token = interactor.execute(
             email=email,

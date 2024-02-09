@@ -1,4 +1,3 @@
-from project.functional.crypto import Crypto
 from project.frameworks_and_drivers.database import db
 from project.entities.user import User
 from flask_pymongo import ObjectId
@@ -18,7 +17,7 @@ class UserDao():
             count = users.count_documents(query)
             pages = count // page_size if count >= page_size else 1
             user_list = [User(
-                _id=Crypto.encrypt(str(ObjectId(user["_id"]))),
+                _id=user["_id"],
                 name=user["name"],
                 profile_pic=user["profile_pic"],
                 gender=user['gender'],
@@ -31,7 +30,7 @@ class UserDao():
                 session_start=user['session_start'],
                 last_activity=user['last_activity'],
                 total_usage_time=user['total_usage_time'],
-                enterprise_id=Crypto.encrypt(user['enterprise_id'])
+                enterprise_id=user['enterprise_id']
                 ).__dict__
                 for user in usersRecieved]
             return user_list, pages
@@ -47,7 +46,7 @@ class UserDao():
             if user is None:
                 return None
             user_to_return = User(
-                _id=Crypto.encrypt(str(ObjectId(user["_id"]))),
+                _id=user["_id"],
                 name=user["name"],
                 profile_pic=user["profile_pic"],
                 gender=user['gender'],
@@ -61,7 +60,7 @@ class UserDao():
                 session_start=user['session_start'],
                 last_activity=user['last_activity'],
                 total_usage_time=user['total_usage_time'],
-                enterprise_id=Crypto.encrypt(user['enterprise_id'])   
+                enterprise_id=user['enterprise_id'] 
             )
             return user_to_return
         except ValueError as e:
@@ -74,7 +73,7 @@ class UserDao():
         try:
             user = users.find_one({"email" : user_email, 'enterprise_id':enterpirse_id})
             user_to_return = User(
-                _id=Crypto.encrypt(user['_id']),
+                _id=user['_id'],
                 name=user["name"],
                 profile_pic=user["profile_pic"],
                 gender=user['gender'],
@@ -87,7 +86,7 @@ class UserDao():
                 session_start=user['session_start'],
                 last_activity=user['last_activity'],
                 total_usage_time=user['total_usage_time'],
-                enterprise_id=Crypto.encrypt(user['enterprise_id'])
+                enterprise_id=user['enterprise_id']
             )    
             return user_to_return
         except ValueError as e:

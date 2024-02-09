@@ -1,5 +1,4 @@
 import json
-from project.functional.crypto import Crypto
 from project.interface_adapters.dao.commentDao import CommentDao
 from project.functional.token import TokenController
 from flask import Blueprint, make_response, request
@@ -19,7 +18,7 @@ def get_products():
     page_size = int(request.args.get('page_size', default=10))
     enterprise_id = request.headers.get('Enterprise-Id')
 
-    interactor = GetProductsInteractor(ProductDao, RateDao, Crypto)
+    interactor = GetProductsInteractor(ProductDao, RateDao)
     product_dicts, pages = interactor.execute(
         page=page,
         page_size=page_size,
@@ -33,7 +32,7 @@ def get_products():
 
 @bpproducts.route("/by_id/result", methods=['GET'])
 def get_products_by_owner_id():
-    interactor = GetProductsByOwnerIdInteractor(UserDao, ProductDao, Crypto)
+    interactor = GetProductsByOwnerIdInteractor(UserDao, ProductDao)
     enterprise_id = request.headers.get('Enterprise-Id')
     user_id = request.args.get('user_id')
     page = int(request.args.get('page', default=1))
@@ -131,7 +130,7 @@ def delete_product():
             'error':'missing product_id'
         })
 
-    product_id = Crypto.decrypt(request_json["product_id"])
+    product_id = request_json["product_id"]
     token = request.headers.get('Authorization')
     enterprise_id = request.headers.get('Enterprise-Id')
 
